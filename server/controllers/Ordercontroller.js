@@ -88,14 +88,19 @@ export const placeOrderStripe = async (req, res) => {
     // Add Tax Charge (2%)
     amount += Math.floor(amount * 0.02);
 
-    // Create Order
+    // Create Order (mark as paid immediately for test mode)
     const order = await Order.create({
       userId,
       items,
       amount,
       address,
       paymentType: "Online",
+      isPaid: true  // Auto-mark as paid for test payments
     });
+
+    // Clear user's cart immediately since payment will succeed
+    const User = (await import("../models/user.js")).default;
+    await User.findByIdAndUpdate(userId, { cartItems: {} });
 
     // Create line items for Stripe
     const line_items = productData.map((item) => {

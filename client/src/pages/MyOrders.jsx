@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { toast } from "react-hot-toast";
 
@@ -6,7 +7,8 @@ import { toast } from "react-hot-toast";
 const MyOrders = () => {
   const [myOrders, setMyOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { currency,user,axios } = useAppContext();
+  const { currency, user, axios } = useAppContext();
+  const location = useLocation();
 
   const fetchMyOrders = async () => {
     try{
@@ -34,8 +36,17 @@ const MyOrders = () => {
       fetchMyOrders();
     } else {
       console.log("User not authenticated, cannot fetch orders");
+      setLoading(false);
     }
   }, [user]);
+  
+  // Refetch orders when coming from payment success
+  useEffect(() => {
+    if (location.state?.fromPayment && user) {
+      console.log('Refetching orders after payment');
+      fetchMyOrders();
+    }
+  }, [location.state]);
   // Show loading state
   if (loading) {
     return (

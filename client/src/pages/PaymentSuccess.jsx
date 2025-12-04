@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { toast } from 'react-hot-toast';
@@ -6,26 +6,37 @@ import { toast } from 'react-hot-toast';
 const PaymentSuccess = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const { clearCart } = useAppContext();
+    const { clearCart, fetchUser } = useAppContext();
+    const [isProcessing, setIsProcessing] = useState(true);
 
     useEffect(() => {
-        // Get session_id from URL params
-        const sessionId = searchParams.get('session_id');
-        
-        if (sessionId) {
-            // Clear cart since payment was successful
-            clearCart();
-            toast.success('Payment successful! Your order has been placed.');
+        const handlePaymentSuccess = async () => {
+            // Get session_id from URL params
+            const sessionId = searchParams.get('session_id');
             
-            // Redirect to my orders after 3 seconds
-            setTimeout(() => {
-                navigate('/my-orders');
-            }, 3000);
-        } else {
-            // If no session_id, redirect to cart
-            navigate('/cart');
-        }
-    }, [searchParams, clearCart, navigate]);
+            if (sessionId) {
+                try {
+                    // Clear cart locally
+                    clearCart();
+                    
+                    // Fetch updated user data to sync cart from backend
+                    await fetchUser();
+                    
+                    toast.success('Payment successful! Your order has been placed.');
+                    setIsProcessing(false);
+                } catch (error) {
+                    console.error('Error processing payment success:', error);
+                    toast.error('Payment successful but there was an issue syncing data');
+                    setIsProcessing(false);
+                }
+            } else {
+                // If no session_id, redirect to cart
+                navigate('/cart');
+            }
+        };
+        
+        handlePaymentSuccess();
+    }, [searchParams, clearCart, fetchUser, navigate]);
 
     return (
         <div className="min-h-screen w-full bg-white flex items-center justify-center px-6">
@@ -43,13 +54,20 @@ const PaymentSuccess = () => {
                 </div>
                 
                 <div className="space-y-4">
-                    <p className="text-sm text-gray-500">
-                        Redirecting to your orders in a few seconds...
-                    </p>
+                    {isProcessing ? (
+                        <p className="text-sm text-gray-500">
+                            Processing your payment...
+                        </p>
+                    ) : (
+                        <p className="text-sm text-gray-500">
+                            Click below to view your order
+                        </p>
+                    )}
                     
                     <button
-                        onClick={() => navigate('/my-orders')}
-                        className="w-full py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+                        onClick={() => navigate('/my-orders', { state: { fromPayment: true } })}
+                        disabled={isProcessing}
+                        className="w-full py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         View My Orders
                     </button>

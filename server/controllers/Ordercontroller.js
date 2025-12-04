@@ -60,70 +60,16 @@ export const placeOrderCOD = async (req, res) => {
 };
 
 
-// Place Order Stripe : POST /api/order/stripe
+// Place Order Stripe : POST /api/order/stripe (DEMO MODE ONLY)
 export const placeOrderStripe = async (req, res) => {
   try {
-    const { userId, items, address } = req.body;
-    const { origin } = req.headers;
-
-    if (!address || items.length === 0) {
-      return res.json({ success: false, message: "Invalid data" });
-    }
-
-    let productData = [];
-
-    // Calculate Amount Using Items
-    let amount = await items.reduce(async (acc, item) => {
-      const product = await Product.findById(item.product);
-
-      productData.push({
-        name: product.name,
-        price: product.offerPrice,
-        quantity: item.quantity,
-      });
-
-      return (await acc) + product.offerPrice * item.quantity;
-    }, 0);
-
-    // Add Tax Charge (2%)
-    amount += Math.floor(amount * 0.02);
-
-    // Create Order
-    const order = await Order.create({
-      userId,
-      items,
-      amount,
-      address,
-      paymentType: "Online",
+    // DEMO MODE: Return mock success without creating order or charging payment
+    return res.json({ 
+      success: true, 
+      demo: true,
+      message: "Online payment is in demo mode. No real transaction will occur.",
+      url: null // No Stripe session created
     });
-
-    // Create line items for Stripe
-    const line_items = productData.map((item) => {
-      return {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: item.name,
-          },
-          unit_amount: Math.floor((item.price + item.price * 0.02) * 100),
-        },
-        quantity: item.quantity,
-      };
-    });
-
-    // Create Stripe Session
-    const session = await stripe.checkout.sessions.create({
-      line_items,
-      mode: "payment",
-      success_url: `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/cart`,
-      metadata: {
-        orderId: order._id.toString(),
-        userId,
-      },
-    });
-
-    return res.json({ success: true, url: session.url });
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }

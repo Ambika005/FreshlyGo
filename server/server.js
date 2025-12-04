@@ -13,7 +13,7 @@ import Orderrouter from './routes/orderroutes.js';
 import { stripeWebhooks } from './controllers/Ordercontroller.js';
 const app = express();
 const port  = process.env.PORT || 4000;
-const allowedOrigins = ['http://localhost:5173','https://freshlygo-backend-five.vercel.app'];
+const allowedOrigins = ['http://localhost:5173','https://freshlygo-frontend.vercel.app'];
 
 await connectDB();
 await connectCloudinary();

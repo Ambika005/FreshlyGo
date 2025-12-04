@@ -14,11 +14,10 @@ import { stripeWebhooks } from './controllers/Ordercontroller.js';
 const app = express();
 const port  = process.env.PORT || 4000;
 
-// CORS configuration - allow both local and Vercel deployments
+// CORS configuration - allow both local and production domains
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://freshlygo-frontend-o5le93dje-ambikas-projects-03aef067.vercel.app',
     'https://freshlygo-frontend.vercel.app'
 ];
 

@@ -332,7 +332,8 @@ const Cart = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
             >
               <option value="Cash On Delivery">Cash On Delivery</option>
-              <option value="Online Payment">Online Payment</option>
+            
+              {/* <option value="Online Payment">Online Payment</option> */}
             </select>
           </div>
 

@@ -13,18 +13,35 @@ import Orderrouter from './routes/orderroutes.js';
 import { stripeWebhooks } from './controllers/Ordercontroller.js';
 const app = express();
 const port  = process.env.PORT || 4000;
-const allowedOrigins = ['http://localhost:5173','https://freshlygo-frontend.vercel.app'];
+
+// CORS configuration - allow both local and Vercel deployments
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://freshlygo-frontend-o5le93dje-ambikas-projects-03aef067.vercel.app',
+    'https://freshlygo-frontend.vercel.app'
+];
 
 await connectDB();
 await connectCloudinary();
+
 //Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// CORS middleware
 app.use(cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('CORS not allowed'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    maxAge: 86400
 }));
 app.use('/api/user',Userrouter);
 app.use('/api/seller',sellerRouter);

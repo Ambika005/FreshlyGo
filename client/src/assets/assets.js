@@ -72,7 +72,7 @@ import barley_image from "./barley_image.png";
 import bg from "./bg.jpg";
 import bg1 from "./bg1.jpeg";
 import bg2 from "./bg3.jpg";
-import gem from "./gem.png";
+import gem from "./Gem.png";
 
 export const assets = {
   logo,

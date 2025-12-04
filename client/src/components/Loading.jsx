@@ -11,7 +11,7 @@ const Loading = () => {
     if(redirectTo){
         setTimeout(() => {
             navigate(`${redirectTo}`);
-        }, 5000);
+        }, 2000);
     }
    }, [navigate, redirectTo]);
 

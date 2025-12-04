@@ -31,16 +31,31 @@ app.use(cookieParser());
 // CORS middleware
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('CORS not allowed'));
+        // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
+        if (!origin) {
+            return callback(null, true);
         }
+        
+        // Check if origin is in allowed list
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        
+        // Allow all Vercel preview deployments for frontend
+        if (origin.includes('freshlygo-frontend') && origin.includes('vercel.app')) {
+            return callback(null, true);
+        }
+        
+        console.log('CORS blocked origin:', origin);
+        callback(new Error('CORS not allowed for origin: ' + origin));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    maxAge: 86400
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 86400,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
 app.use('/api/user',Userrouter);
 app.use('/api/seller',sellerRouter);
